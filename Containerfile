@@ -61,11 +61,9 @@ RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.
         bat \
         borgbackup \
         btop \
-        eza \
         fd-find \
         fzf \
         gh \
-        git-delta \
         htop \
         just \
         ncdu \

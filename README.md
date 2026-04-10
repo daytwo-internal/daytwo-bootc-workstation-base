@@ -26,7 +26,7 @@ The [`Containerfile`](Containerfile) applies layers in this order (see the file 
 - **Networking / VPN:** **ZeroTier** (`zerotier-one`) from [`etc/yum.repos.d/zerotier.repo`](etc/yum.repos.d/zerotier.repo) → [`download.zerotier.com`](https://download.zerotier.com/) **el/9** (upstream has not published **el/10** yet; RHEL 10 uses these builds). Join after boot: `sudo zerotier-cli join <network_id>`.
 - **Terraform:** HashiCorp repo via [`etc/yum.repos.d/hashicorp.repo`](etc/yum.repos.d/hashicorp.repo) (currently **`RHEL/9`** `baseurl`; adjust when you standardize on el10 paths).
 - **Backups (EPEL):** `borgbackup`, `restic`, `rclone`; **`rsync`** on the host. **Deja Dup** is not an RPM here — use Flathub: `flatpak install flathub org.gnome.DejaDup` after adding Flathub.
-- **Git / terminal UX (EPEL):** `git-delta`, `gh`, plus tools in the **LinuxTeck** table below. **`lazygit`** is not baked in — `mise install lazygit` (or `mise use -g lazygit@…`).
+- **Git / terminal UX (EPEL):** `gh`, plus tools in the **LinuxTeck** table below. **`lazygit`** is not baked in — `mise install lazygit` (or `mise use -g lazygit@…`).
 - **Not on the host:** Heavy network capture/scan tools (e.g. Wireshark, `nmap`, `tcpdump`) — use Toolbx. **Compilers** — use mise, Toolbx, or pet containers.
 
 ### LinuxTeck-style tools → RPM names (RHEL 10 + EPEL)
@@ -36,10 +36,8 @@ The [LinuxTeck “modern Linux tools”](https://www.linuxteck.com/modern-linux-
 | Article / usual name | RPM package | Binary notes |
 |----------------------|-------------|--------------|
 | bat | `bat` | `bat` |
-| eza | `eza` | `eza` |
 | ripgrep (`rg`) | `ripgrep` | `rg` |
 | fd | **`fd-find`** | **`fd`** (not Debian’s `fdfind`) |
-| git-delta (`delta`) | `git-delta` | `delta` — e.g. `git config --global core.pager delta` |
 | tldr | `tldr` | `tldr` |
 | btop | `btop` | `btop` |
 | fzf | `fzf` | `fzf` |
