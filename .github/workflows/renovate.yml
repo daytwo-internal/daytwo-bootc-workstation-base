@@ -1,0 +1,59 @@
+name: Renovate
+
+# Schedule: daily at 06:00 UTC. Renovate itself will further honor the
+# schedule rules defined in .github/renovate.json (currently: only open PRs
+# before 6am on Monday) — the workflow cron is just when Renovate *checks*,
+# not when it *acts*.
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Renovate log level'
+        required: false
+        default: 'info'
+        type: choice
+        options:
+          - debug
+          - info
+          - warn
+
+concurrency:
+  group: renovate
+  cancel-in-progress: false
+
+jobs:
+  renovate:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Self-hosted Renovate
+        uses: renovatebot/github-action@v41.0.0
+        env:
+          LOG_LEVEL: ${{ inputs.logLevel || 'info' }}
+          RENOVATE_HOST_RULES: |
+            [
+              {
+                "matchHost": "registry.redhat.io",
+                "hostType": "docker",
+                "username": "${{ secrets.REGISTRY_REDHAT_IO_USER }}",
+                "password": "${{ secrets.REGISTRY_REDHAT_IO_PASSWORD }}"
+              }
+            ]
+        with:
+          # We use a PAT (not the default GITHUB_TOKEN) so that PRs opened by
+          # Renovate DO trigger the build workflow. GITHUB_TOKEN-authored PRs
+          # don't trigger downstream workflows by design, which would defeat
+          # the purpose here (we want to see CI green on the Renovate PR
+          # before merging).
+          token: ${{ secrets.RENOVATE_TOKEN }}
+          configurationFile: .github/renovate.json

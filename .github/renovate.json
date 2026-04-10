@@ -1,0 +1,61 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":timezone(America/Guayaquil)"
+  ],
+  "description": "Renovate config for DayTwo RHEL 10 bootc workstation base image",
+  "schedule": [
+    "before 6am on monday"
+  ],
+  "labels": [
+    "dependencies",
+    "renovate"
+  ],
+  "packageRules": [
+    {
+      "description": "Group all rhel-bootc base image digest updates into a single PR",
+      "matchPackageNames": [
+        "registry.redhat.io/rhel10/rhel-bootc"
+      ],
+      "groupName": "rhel-bootc base image",
+      "commitMessagePrefix": "chore(deps):",
+      "commitMessageTopic": "rhel-bootc base image",
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "deps",
+      "automerge": false,
+      "pinDigests": true
+    },
+    {
+      "description": "Group GitHub Actions updates",
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions",
+      "automerge": false
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update the base image digest in Containerfile",
+      "fileMatch": ["(^|/)Containerfile$"],
+      "matchStrings": [
+        "FROM\\s+(?<depName>registry\\.redhat\\.io/rhel10/rhel-bootc)@(?<currentDigest>sha256:[a-f0-9]{64})"
+      ],
+      "datasourceTemplate": "docker",
+      "currentValueTemplate": "latest"
+    }
+  ],
+  "hostRules": [
+    {
+      "matchHost": "registry.redhat.io",
+      "hostType": "docker"
+    }
+  ],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "rebaseWhen": "conflicted",
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "🔄 Renovate Dependency Dashboard"
+}

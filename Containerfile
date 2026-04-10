@@ -5,7 +5,9 @@
 #
 # See README.md for build, push, and consumption instructions.
 
-FROM registry.redhat.io/rhel10/rhel-bootc:latest
+# Base image: pinned by digest for reproducibility.
+# Renovate updates this automatically when upstream publishes a new digest.
+FROM registry.redhat.io/rhel10/rhel-bootc@sha256:593ce131ff57be0763bc749c2df140e5003b506319f4a04b8aced9150f373045
 
 LABEL org.opencontainers.image.title="DayTwo RHEL 10 Bootc Workstation Base" \
       org.opencontainers.image.description="Shared base image for DayTwo DevOps team workstations" \
