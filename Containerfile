@@ -62,10 +62,10 @@ RUN dnf -y groupinstall --nodocs Workstation && \
     dnf -y update --nodocs && \
     dnf -y install --nodocs \
         # Core CLI / shell
-        git git-lfs gh tmux zsh vim-enhanced jq yq tree htop bind-utils \
-        wget curl rsync unzip p7zip \
+        git git-lfs tmux zsh vim-enhanced jq tree bind-utils \
+        wget curl rsync unzip \
         # Container / k8s tooling
-        podman podman-compose buildah skopeo bootc \
+        podman buildah skopeo bootc \
         # Virtualization (libvirt + virt-manager UI)
         qemu-kvm libvirt libvirt-client virt-install virt-manager \
         edk2-ovmf \
@@ -73,7 +73,7 @@ RUN dnf -y groupinstall --nodocs Workstation && \
         nmap tcpdump wireshark traceroute mtr nftables iproute \
         NetworkManager-tui \
         # Languages & dev tooling
-        python3 python3-pip python3-virtualenv \
+        python3 python3-pip \
         nodejs golang rust cargo make gcc gcc-c++ \
         # Ansible
         ansible-core \
@@ -83,8 +83,7 @@ RUN dnf -y groupinstall --nodocs Workstation && \
         code google-chrome-stable \
         # HashiCorp
         terraform \
-        # Backup tooling (rclone — config NEVER baked in)
-        rclone restic && \
+        && \
     # Bundled RPMs (no-op if rpms/ is empty)
     bash -c 'shopt -s nullglob; rpms=(/tmp/rpms/*.rpm); if [ ${#rpms[@]} -gt 0 ]; then dnf -y install --nodocs --nogpgcheck "${rpms[@]}"; fi' && \
     rm -rf /tmp/rpms
