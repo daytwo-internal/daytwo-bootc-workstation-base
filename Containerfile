@@ -90,6 +90,18 @@ RUN dnf -y groupinstall --nodocs Workstation && \
     bash -c 'shopt -s nullglob; rpms=(/tmp/rpms/*.rpm); if [ ${#rpms[@]} -gt 0 ]; then dnf -y install --nodocs --nogpgcheck "${rpms[@]}"; fi' && \
     rm -rf /tmp/rpms
 
+# Chrome ships its icons only in /opt/google/chrome/. The RPM does not
+# install them to /usr/share/icons/hicolor/ or /usr/share/pixmaps/, so
+# GNOME Shell cannot find them via the standard icon theme lookup. Create
+# symlinks manually during build time (we cannot do this at runtime
+# because /usr is read-only in bootc image mode).
+RUN for size in 16 24 32 48 64 128 256; do \
+        mkdir -p /usr/share/icons/hicolor/${size}x${size}/apps && \
+        ln -sf /opt/google/chrome/product_logo_${size}.png \
+               /usr/share/icons/hicolor/${size}x${size}/apps/google-chrome.png ; \
+    done && \
+    gtk-update-icon-cache -f -t /usr/share/icons/hicolor/ 2>/dev/null || true
+
 # ──────────────────────────────────────────────────────────────────────────────
 # 5. Install OpenShift CLI (oc + kubectl) — pinned version
 # ──────────────────────────────────────────────────────────────────────────────
