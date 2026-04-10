@@ -24,7 +24,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # GitHub-hosted runners only have ~14GB free. A RHEL Workstation image
       # with all our DevOps tooling needs more than that to commit the layer.
