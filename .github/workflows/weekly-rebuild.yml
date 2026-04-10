@@ -1,0 +1,17 @@
+name: Weekly Rebuild
+
+# Rebuilds the base image every Monday at 06:00 UTC so it picks up security
+# updates from registry.redhat.io/rhel10/rhel-bootc and any new RPM versions
+# from BaseOS / AppStream / CRB.
+#
+# Derivatives should rebuild on Tuesday at 06:00 UTC, after this one finishes.
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  rebuild:
+    uses: ./.github/workflows/build.yml
+    secrets: inherit

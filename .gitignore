@@ -1,0 +1,30 @@
+# Build artifacts
+bootiso/
+output/
+manifest-*.json
+image-build.log
+*.log
+
+# Secrets — must NEVER be baked into images or committed
+activation_key.txt
+org_id.txt
+etc/rclone.conf
+etc/rclone/
+**/credentials.json
+**/*.token
+**/*.pem
+**/*-key.json
+.env
+.env.*
+!.env.example
+
+# Editor / OS junk
+*~
+*.swp
+.DS_Store
+.idea/
+.vscode/
+
+# Local Claude / agent state
+.claude/
+.aider*

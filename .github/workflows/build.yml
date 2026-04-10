@@ -1,0 +1,128 @@
+name: Build and Push rhel10-bootc-workstation (base)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Containerfile'
+      - 'etc/**'
+      - 'systemd/**'
+      - 'rpms/**'
+      - '.github/workflows/build.yml'
+  workflow_call:
+  workflow_dispatch:
+
+env:
+  IMAGE_REGISTRY: quay.io
+  IMAGE_NAMESPACE: daytwo
+  IMAGE_NAME: rhel10-bootc-workstation
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # GitHub-hosted runners only have ~14GB free. A RHEL Workstation image
+      # with all our DevOps tooling needs more than that to commit the layer.
+      # This frees ~30GB by removing pre-installed software we don't use.
+      - name: Free up runner disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+                      /opt/hostedtoolcache /usr/local/share/boost
+          sudo docker image prune --all --force || true
+          df -h
+
+      - name: Install podman 5.x
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+          podman --version
+
+      - name: Log in to registry.redhat.io (pull base image)
+        run: |
+          podman login registry.redhat.io \
+            -u '${{ secrets.REGISTRY_REDHAT_IO_USER }}' \
+            -p '${{ secrets.REGISTRY_REDHAT_IO_PASSWORD }}'
+
+      - name: Log in to quay.io (push built image)
+        run: |
+          podman login ${{ env.IMAGE_REGISTRY }} \
+            -u '${{ secrets.QUAY_USER }}' \
+            -p '${{ secrets.QUAY_PASSWORD }}'
+
+      - name: Compute image tags
+        id: tags
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          DATE_TAG="$(date -u +%Y%m%d)"
+          echo "short_sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "date_tag=${DATE_TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Build image
+        env:
+          RHSM_ACTIVATION_KEY: ${{ secrets.RHSM_ACTIVATION_KEY }}
+          RHSM_ORG_ID: ${{ secrets.RHSM_ORG_ID }}
+        run: |
+          # Write secrets to disk so podman build --secret can mount them.
+          # We delete them in the always() step regardless of build outcome.
+          printf '%s' "$RHSM_ACTIVATION_KEY" > activation_key.txt
+          printf '%s' "$RHSM_ORG_ID" > org_id.txt
+
+          IMAGE_FQN="${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}/${IMAGE_NAME}"
+
+          podman build \
+            --secret id=activation_key,src=activation_key.txt \
+            --secret id=org_id,src=org_id.txt \
+            --tag "${IMAGE_FQN}:latest" \
+            --tag "${IMAGE_FQN}:${{ steps.tags.outputs.date_tag }}" \
+            --tag "${IMAGE_FQN}:${{ steps.tags.outputs.short_sha }}" \
+            .
+
+      - name: Wipe secret files
+        if: always()
+        run: |
+          shred -u activation_key.txt org_id.txt 2>/dev/null || \
+            rm -f activation_key.txt org_id.txt
+
+      - name: Inspect image
+        run: |
+          IMAGE_FQN="${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}/${IMAGE_NAME}"
+          podman image inspect "${IMAGE_FQN}:latest" \
+            --format '{{ .Size }} bytes — {{ .Created }}'
+          podman image tree "${IMAGE_FQN}:latest" || true
+
+      - name: Push all tags
+        run: |
+          IMAGE_FQN="${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}/${IMAGE_NAME}"
+          podman push "${IMAGE_FQN}:latest"
+          podman push "${IMAGE_FQN}:${{ steps.tags.outputs.date_tag }}"
+          podman push "${IMAGE_FQN}:${{ steps.tags.outputs.short_sha }}"
+
+      - name: Trigger derivative rebuilds
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ secrets.DERIVATIVE_DISPATCH_TOKEN }}
+        run: |
+          # Optional: notify each derivative repo so it rebuilds with the new
+          # base. Requires a PAT with `repo` scope stored as
+          # DERIVATIVE_DISPATCH_TOKEN. If unset, this step is a no-op.
+          if [ -z "${GH_TOKEN}" ]; then
+            echo "DERIVATIVE_DISPATCH_TOKEN not set — skipping cascade"
+            exit 0
+          fi
+          for repo in \
+              daytwo/rhel10-bootc-workstation-rarguello \
+              ; do
+            echo "Dispatching base-updated event to ${repo}"
+            curl -fsSL \
+              -X POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              "https://api.github.com/repos/${repo}/dispatches" \
+              -d '{"event_type":"base-updated"}' || \
+              echo "  ↳ failed to dispatch to ${repo} (continuing)"
+          done
