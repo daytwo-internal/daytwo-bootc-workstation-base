@@ -53,7 +53,8 @@ RUN dnf -y update && \
         virt-manager \
         vim-enhanced \
         wget \
-        zsh
+        zsh \
+        zstd
 
 # EPEL:
 RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm && \
