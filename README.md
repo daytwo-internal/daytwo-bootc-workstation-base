@@ -13,7 +13,7 @@ The [`Containerfile`](Containerfile) applies layers in this order (see the file 
 3. **EPEL 10:** Install [`epel-release-latest-10`](https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm), then **only** EPEL packages (modern CLIs, backups, Git UX). EPEL is **community-maintained** and **not** covered by Red Hat product support; CRB stays enabled for dependencies.
 4. **Repo files + keys:** `COPY etc/yum.repos.d/` (VS Code, Google Chrome, HashiCorp, ZeroTier), then `rpm --import` for Microsoft, Google, HashiCorp, and ZeroTier GPG keys.
 5. **Signed third-party RPMs:** `code`, `google-chrome-stable`, `terraform`, `zerotier-one` via those repos.
-6. **COPR:** [mise](https://mise.jdx.dev/) (`jdxcode/mise`), then [Ghostty](https://ghostty.org/) (`scottames/ghostty`, as in [upstream Linux install docs](https://ghostty.org/docs/install/binary)).
+6. **COPR:** [mise](https://mise.jdx.dev/) (`jdxcode/mise`).
 7. **Chrome on GNOME:** Symlinks so Chrome’s icons appear in the shell (read-only `/usr` on bootc).
 8. **OpenShift client:** Pinned `oc` + `kubectl` tarball (`ARG OC_VERSION`). **Helm is not installed in the base image** — use **mise** (e.g. `mise install helm`) or a derivative layer if the team standardizes a version.
 9. **Config:** `COPY etc/` (including `rpm-ostreed.conf`) and `systemd/`.

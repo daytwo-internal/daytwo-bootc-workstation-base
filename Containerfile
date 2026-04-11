@@ -90,10 +90,6 @@ RUN dnf -y install \
 RUN dnf -y copr enable jdxcode/mise && \
     dnf -y install mise
 
-# Ghostty: https://ghostty.org/docs/install/binary
-RUN dnf -y copr enable scottames/ghostty && \
-    dnf -y install ghostty
-
 # Chrome icons for GNOME:
 RUN for size in 16 24 32 48 64 128 256; do \
         mkdir -p /usr/share/icons/hicolor/${size}x${size}/apps && \
