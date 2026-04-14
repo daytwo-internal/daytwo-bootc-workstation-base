@@ -1,5 +1,5 @@
 # RHEL 10 bootc Workstation Base Image
-FROM registry.redhat.io/rhel10/rhel-bootc@sha256:e81f6b7e6dd197d3f2a82c88cbde40e76942611dd09985f9840802b5abb09ae3
+FROM registry.redhat.io/rhel10/rhel-bootc@sha256:e983235c2f531901c990c81b9d121663fa3b6db156e7b074c11eb812edba8fce
 
 LABEL org.opencontainers.image.title="DayTwo RHEL 10 Bootc Workstation Base" \
       org.opencontainers.image.description="Shared base image for DayTwo DevOps team workstations" \
