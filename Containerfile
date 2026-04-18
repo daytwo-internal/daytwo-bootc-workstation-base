@@ -18,7 +18,7 @@ RUN --mount=type=secret,id=activation_key \
         --enable=rhel-10-for-x86_64-appstream-rpms \
         --enable=codeready-builder-for-rhel-10-x86_64-rpms
 
-# RHEL 10:
+# RHEL 10
 RUN dnf -y update && \
     dnf -y groupinstall Workstation && \
     dnf -y install \
@@ -56,7 +56,7 @@ RUN dnf -y update && \
         zsh \
         zstd
 
-# EPEL:
+# EPEL
 RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm && \
     dnf -y install \
         bat \
@@ -73,7 +73,7 @@ RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.
         ripgrep \
         tldr
 
-# Third-party software:
+# Third-party software
 COPY etc/yum.repos.d/ /etc/yum.repos.d/
 
 RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc && \
@@ -87,11 +87,15 @@ RUN dnf -y install \
         terraform \
         zerotier-one
 
-# mise: https://mise.jdx.dev
+# mise
 RUN dnf -y copr enable jdxcode/mise && \
     dnf -y install mise
 
-# Chrome icons for GNOME:
+# Starship
+RUN dnf -y copr enable atim/starship && \
+    dnf -y install starship
+
+#  Icons for GNOME
 RUN for size in 16 24 32 48 64 128 256; do \
         mkdir -p /usr/share/icons/hicolor/${size}x${size}/apps && \
         ln -sf /opt/google/chrome/product_logo_${size}.png \
@@ -99,7 +103,7 @@ RUN for size in 16 24 32 48 64 128 256; do \
     done && \
     gtk-update-icon-cache -f -t /usr/share/icons/hicolor/ 2>/dev/null || true
 
-# OpenShift CLI:
+# OpenShift CLI
 ARG OC_VERSION=4.20
 RUN curl -fsSL "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-${OC_VERSION}/openshift-client-linux.tar.gz" \
         -o /tmp/oc.tar.gz && \
@@ -107,7 +111,7 @@ RUN curl -fsSL "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable
     chmod +x /usr/local/bin/oc /usr/local/bin/kubectl && \
     rm -f /tmp/oc.tar.gz
 
-# System configuration:
+# System configuration
 COPY etc/ /etc/
 COPY systemd/ /etc/systemd/system/
 
@@ -119,7 +123,7 @@ RUN systemctl enable \
         && \
     systemctl set-default graphical.target
 
-# Unregister from RHSM and clean up:
+# Unregister from RHSM and clean up
 RUN subscription-manager unregister || true && \
     subscription-manager clean && \
     dnf clean all && \
