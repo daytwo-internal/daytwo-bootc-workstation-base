@@ -13,7 +13,6 @@ dnf -y --nodocs --setopt=install_weak_deps=False install \
     htop \
     just \
     ncdu \
-    python3-neovim \
     rclone \
     restic \
     ripgrep \
