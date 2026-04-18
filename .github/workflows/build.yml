@@ -5,9 +5,8 @@ on:
     branches: [main]
     paths:
       - 'Containerfile'
-      - 'etc/**'
-      - 'systemd/**'
-      - 'rpms/**'
+      - 'rootfs/**'
+      - 'build.d/**'
       - '.github/workflows/build.yml'
   workflow_call:
   workflow_dispatch:

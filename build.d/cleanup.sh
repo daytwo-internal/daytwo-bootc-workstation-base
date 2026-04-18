@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+subscription-manager unregister || true
+subscription-manager clean
+dnf clean all
+rm -rf \
+    /var/cache/dnf \
+    /var/cache/ldconfig/* \
+    /var/log/*.log \
+    /var/log/dnf* \
+    /var/log/hawkey.log \
+    /var/log/yum* \
+    /tmp/* \
+    /var/tmp/*
+
+bootc container lint
