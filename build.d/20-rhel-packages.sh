@@ -37,6 +37,5 @@ dnf -y --nodocs --setopt=install_weak_deps=False install \
     virt-manager \
     vim-enhanced \
     wget \
-    wl-clipboard \
     zsh \
     zstd
