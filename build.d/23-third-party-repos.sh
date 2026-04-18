@@ -8,10 +8,9 @@ rpm --import https://rpm.releases.hashicorp.com/gpg
 rpm --import 'https://raw.githubusercontent.com/zerotier/ZeroTierOne/main/doc/contact%40zerotier.com.gpg'
 
 # COPR repos
-dnf -y copr enable agriffis/neovim-nightly
-dnf -y copr enable jdxcode/mise
 dnf -y copr enable atim/starship
 dnf -y copr enable che/nerd-fonts
+dnf -y copr enable jdxcode/mise
 
 # Multimedia repo (disabled by default, used with --enablerepo in 06-multimedia.sh)
 dnf config-manager --add-repo=https://negativo17.org/repos/epel-multimedia.repo
