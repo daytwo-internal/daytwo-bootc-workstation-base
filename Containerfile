@@ -95,6 +95,9 @@ RUN dnf -y copr enable jdxcode/mise && \
 RUN dnf -y copr enable atim/starship && \
     dnf -y install starship
 
+RUN dnf -y copr enable che/nerd-fonts && \
+    dnf -y install nerd-fonts
+
 #  Icons for GNOME
 RUN for size in 16 24 32 48 64 128 256; do \
         mkdir -p /usr/share/icons/hicolor/${size}x${size}/apps && \
