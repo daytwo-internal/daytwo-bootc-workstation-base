@@ -9,7 +9,7 @@ rpm --import 'https://raw.githubusercontent.com/zerotier/ZeroTierOne/main/doc/co
 
 # COPR repos
 dnf -y copr enable atim/starship
-dnf -y copr enable che/nerd-fonts
+dnf -y copr enable che/nerd-fonts rhel-10-x86_64
 dnf -y copr enable jdxcode/mise
 
 # Multimedia repo (disabled by default, used with --enablerepo in 06-multimedia.sh)
