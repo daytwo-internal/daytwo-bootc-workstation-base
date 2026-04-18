@@ -13,6 +13,7 @@ dnf -y --nodocs --setopt=install_weak_deps=False install \
     htop \
     just \
     ncdu \
+    neovim \
     rclone \
     restic \
     ripgrep \
