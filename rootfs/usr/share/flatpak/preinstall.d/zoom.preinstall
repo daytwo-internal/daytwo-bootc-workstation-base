@@ -1,2 +1,2 @@
-[us.zoom.Zoom]
-Preinstall=true
+[Flatpak Preinstall us.zoom.Zoom]
+Branch=stable

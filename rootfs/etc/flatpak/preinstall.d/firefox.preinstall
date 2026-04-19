@@ -1,2 +1,2 @@
-[org.mozilla.firefox]
-Preinstall=false
+[Flatpak Preinstall org.mozilla.firefox]
+Install=false

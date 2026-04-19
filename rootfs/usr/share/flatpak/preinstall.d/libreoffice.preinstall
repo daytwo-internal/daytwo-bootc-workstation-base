@@ -1,2 +1,2 @@
-[org.libreoffice.LibreOffice]
-Preinstall=true
+[Flatpak Preinstall org.libreoffice.LibreOffice]
+Branch=stable

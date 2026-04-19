@@ -1,2 +1,2 @@
-[io.podman_desktop.PodmanDesktop]
-Preinstall=true
+[Flatpak Preinstall io.podman_desktop.PodmanDesktop]
+Branch=stable
