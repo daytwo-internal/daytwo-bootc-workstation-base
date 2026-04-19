@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-set -eo pipefail
+set -euxo pipefail
 
-dnf -y --nodocs --setopt=install_weak_deps=False update
+dnf -y update
 
-dnf -y --nodocs --setopt=install_weak_deps=False groupinstall Workstation
+dnf -y groupinstall Workstation
 
-dnf -y --nodocs --setopt=install_weak_deps=False install \
+dnf -y install \
     ansible-core \
     bootc \
     buildah \

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eo pipefail
+set -euxo pipefail
 
 subscription-manager register \
     --activationkey="$(cat /run/secrets/activation_key)" \

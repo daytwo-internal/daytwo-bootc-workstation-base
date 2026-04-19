@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-set -eo pipefail
+set -euxo pipefail
 
-dnf -y --nodocs install --enablerepo=epel-multimedia \
+dnf -y install --enablerepo=epel-multimedia \
     ffmpeg \
     libavcodec \
     @multimedia \

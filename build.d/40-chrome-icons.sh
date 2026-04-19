@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eo pipefail
+set -euxo pipefail
 
 for size in 16 24 32 48 64 128 256; do
     mkdir -p /usr/share/icons/hicolor/${size}x${size}/apps

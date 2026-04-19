@@ -7,6 +7,7 @@ LABEL org.opencontainers.image.title="DayTwo RHEL 10 Bootc Workstation Base" \
       org.opencontainers.image.source="https://github.com/daytwo-internal/rhel10-bootc-workstation-base"
 
 ARG OC_VERSION=4.20
+ARG NEOVIM_VERSION=0.11.2
 
 COPY rootfs/ /
 COPY build.d/ /tmp/build.d/

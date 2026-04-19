@@ -1,12 +1,24 @@
 #!/usr/bin/env bash
-set -eo pipefail
+set -euxo pipefail
 
-dnf -y --nodocs --setopt=install_weak_deps=False install \
-    code \
-    google-chrome-stable \
-    mise \
-    neovim \
-    nerd-fonts \
-    starship \
-    terraform \
-    zerotier-one
+# Third-party yum repos (code, google-chrome, hashicorp, zerotier)
+dnf -y \
+    --enablerepo=code \
+    --enablerepo=google-chrome \
+    --enablerepo=hashicorp \
+    --enablerepo=zerotier \
+    install \
+        code \
+        google-chrome-stable \
+        terraform \
+        zerotier-one
+
+# COPR packages
+dnf -y \
+    --enablerepo="copr:copr.fedorainfracloud.org:atim:starship" \
+    --enablerepo="copr:copr.fedorainfracloud.org:che:nerd-fonts" \
+    --enablerepo="copr:copr.fedorainfracloud.org:jdxcode:mise" \
+    install \
+        mise \
+        nerd-fonts \
+        starship

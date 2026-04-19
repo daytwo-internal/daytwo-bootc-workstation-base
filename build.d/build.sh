@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eo pipefail
+set -euxo pipefail
 
 BUILD_D="$(dirname "$(realpath "$0")")"
 
