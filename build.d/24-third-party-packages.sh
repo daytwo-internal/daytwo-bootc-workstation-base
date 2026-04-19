@@ -17,10 +17,12 @@ dnf -y \
 
 # COPR packages
 dnf -y \
+    --enablerepo="copr:copr.fedorainfracloud.org:jchisholm204:Alacritty" \
     --enablerepo="copr:copr.fedorainfracloud.org:atim:starship" \
     --enablerepo="copr:copr.fedorainfracloud.org:che:nerd-fonts" \
     --enablerepo="copr:copr.fedorainfracloud.org:jdxcode:mise" \
     install \
+        alacritty \
         mise \
         nerd-fonts \
         starship

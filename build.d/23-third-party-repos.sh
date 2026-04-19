@@ -9,6 +9,8 @@ rpm --import https://rpm.releases.hashicorp.com/gpg
 rpm --import 'https://raw.githubusercontent.com/zerotier/ZeroTierOne/main/doc/contact%40zerotier.com.gpg'
 
 # COPR repos — disabled immediately, enabled only at install time
+dnf -y copr enable jchisholm204/Alacritty
+dnf -y copr disable jchisholm204/Alacritty
 dnf -y copr enable atim/starship
 dnf -y copr disable atim/starship
 dnf -y copr enable che/nerd-fonts rhel-10-x86_64
