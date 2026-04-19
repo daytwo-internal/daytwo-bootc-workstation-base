@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 set -euxo pipefail
 
-# Third-party yum repos (code, google-chrome, hashicorp, zerotier)
+# Third-party yum repos
 dnf -y \
+    --enablerepo=1password \
     --enablerepo=code \
     --enablerepo=google-chrome \
     --enablerepo=hashicorp \
     --enablerepo=zerotier \
     install \
+        1password \
         code \
         google-chrome-stable \
         terraform \

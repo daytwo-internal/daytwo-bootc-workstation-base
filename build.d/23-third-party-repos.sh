@@ -2,6 +2,7 @@
 set -euxo pipefail
 
 # GPG keys (repo files already present via COPY rootfs/)
+rpm --import https://downloads.1password.com/linux/keys/1password.asc
 rpm --import https://packages.microsoft.com/keys/microsoft.asc
 rpm --import https://dl.google.com/linux/linux_signing_key.pub
 rpm --import https://rpm.releases.hashicorp.com/gpg
