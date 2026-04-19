@@ -6,6 +6,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
+Environment=DBUS_SESSION_BUS_ADDRESS=disabled:
 ExecStart=/usr/bin/flatpak preinstall -y
 RemainAfterExit=yes
 
