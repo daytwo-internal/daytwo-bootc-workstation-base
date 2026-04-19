@@ -1,7 +1,7 @@
 [Unit]
 Description=Flatpak system pre-installation
-Documentation=https://docs.flatpak.org/en/latest/flatpak-command-reference.html#flatpak-preinstall
-After=graphical-session.target
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=oneshot
@@ -9,4 +9,4 @@ ExecStart=/usr/bin/flatpak preinstall -y --noninteractive
 RemainAfterExit=yes
 
 [Install]
-WantedBy=graphical-session.target
+WantedBy=multi-user.target
