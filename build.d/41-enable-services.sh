@@ -4,9 +4,11 @@ set -euxo pipefail
 systemctl enable \
     bootc-fetch-apply-updates.timer \
     cockpit.socket \
-    flatpak-preinstall.service \
-    flatpak-update.timer \
     libvirtd.socket \
     zerotier-one.service
+
+systemctl --global enable \
+    flatpak-preinstall.service \
+    flatpak-update.timer
 
 systemctl set-default graphical.target

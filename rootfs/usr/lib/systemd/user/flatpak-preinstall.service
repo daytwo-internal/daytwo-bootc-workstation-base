@@ -1,14 +1,12 @@
 [Unit]
 Description=Flatpak system pre-installation
 Documentation=https://docs.flatpak.org/en/latest/flatpak-command-reference.html#flatpak-preinstall
-After=network-online.target
-Wants=network-online.target
+After=graphical-session.target
 
 [Service]
 Type=oneshot
-Environment=DBUS_SESSION_BUS_ADDRESS=disabled:
 ExecStart=/usr/bin/flatpak preinstall -y
 RemainAfterExit=yes
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=graphical-session.target
