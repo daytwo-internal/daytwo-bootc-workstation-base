@@ -1,2 +1,3 @@
 [us.zoom.Zoom]
 Preinstall=true
+CollectionID=org.flathub.Stable
