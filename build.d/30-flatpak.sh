@@ -10,3 +10,7 @@ curl --retry 3 -fsSLo /etc/flatpak/remotes.d/flathub.flatpakrepo \
 # to fail trying to install RHEL-declared apps (e.g. Firefox) that we
 # don't want managed through Flatpak.
 rm -f /etc/flatpak/remotes.d/rhel.flatpakrepo
+
+# Remove RHEL-provided preinstall declarations (Firefox, etc. via com.redhat.Stable).
+# Our preinstall files live in /usr/share/flatpak/preinstall.d/ and are unaffected.
+rm -f /etc/flatpak/preinstall.d/*.preinstall
