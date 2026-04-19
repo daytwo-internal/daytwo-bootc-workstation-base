@@ -1,3 +1,2 @@
 [org.libreoffice.LibreOffice]
 Preinstall=true
-Remote=flathub
