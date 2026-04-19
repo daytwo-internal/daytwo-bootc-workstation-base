@@ -3,6 +3,7 @@ set -euxo pipefail
 
 systemctl enable \
     cockpit.socket \
+    flatpak-preinstall.service \
     libvirtd.socket \
     zerotier-one.service
 
