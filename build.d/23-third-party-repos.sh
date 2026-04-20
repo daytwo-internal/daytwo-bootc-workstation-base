@@ -17,6 +17,8 @@ dnf -y copr enable che/nerd-fonts rhel-10-x86_64
 dnf -y copr disable che/nerd-fonts
 dnf -y copr enable jdxcode/mise
 dnf -y copr disable jdxcode/mise
+dnf -y copr enable scottames/ghostty
+dnf -y copr disable scottames/ghostty
 
 # Multimedia repo — disabled, enabled only at install time in 25-multimedia.sh
 dnf config-manager --add-repo=https://negativo17.org/repos/epel-multimedia.repo

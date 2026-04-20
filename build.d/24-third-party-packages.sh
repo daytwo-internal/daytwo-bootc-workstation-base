@@ -21,8 +21,10 @@ dnf -y \
     --enablerepo="copr:copr.fedorainfracloud.org:atim:starship" \
     --enablerepo="copr:copr.fedorainfracloud.org:che:nerd-fonts" \
     --enablerepo="copr:copr.fedorainfracloud.org:jdxcode:mise" \
+    --enablerepo="copr:copr.fedorainfracloud.org:scottames:ghostty" \
     install \
         alacritty \
+        ghostty \
         mise \
         nerd-fonts \
         starship
