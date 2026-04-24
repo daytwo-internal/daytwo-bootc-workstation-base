@@ -3,6 +3,10 @@ set -euxo pipefail
 
 subscription-manager unregister || true
 subscription-manager clean
+
+# Compile dconf system database so extension settings take effect on first login
+dconf update
+
 dnf clean all
 rm -rf \
     /var/cache/dnf \

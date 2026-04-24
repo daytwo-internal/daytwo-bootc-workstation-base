@@ -1,0 +1,18 @@
+# System-wide GNOME defaults — users can override everything unless locked.
+# Extensions are copied from ghcr.io/ublue-os/bluefin:lts-50 during image build.
+
+[org/gnome/shell]
+enabled-extensions=['appindicatorsupport@rgcjonas.gmail.com', 'blur-my-shell@aunetx', 'caffeine@patapon.info', 'dash-to-dock@micxgx.gmail.com']
+disable-user-extensions=false
+
+[org/gnome/shell/extensions/dash-to-dock]
+dock-position='BOTTOM'
+extend-height=false
+transparency-mode='FIXED'
+background-opacity=0.8
+show-mounts=false
+show-trash=true
+
+[org/gnome/shell/extensions/blur-my-shell]
+brightness=0.75
+sigma=30
