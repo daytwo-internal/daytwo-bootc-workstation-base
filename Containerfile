@@ -1,6 +1,6 @@
-# GNOME 50 extensions pre-built by Bluefin LTS — avoids compiling TypeScript (Blur My Shell,
+# GNOME 49 extensions pre-built by Bluefin LTS — avoids compiling TypeScript (Blur My Shell,
 # Dash to Dock use `make`). Extensions are OS-agnostic JS + GSettings schemas.
-FROM ghcr.io/ublue-os/bluefin:lts-testing AS bluefin-gnome50
+FROM ghcr.io/ublue-os/bluefin:lts AS bluefin-gnome49
 
 # RHEL 10 bootc Workstation Base Image
 FROM registry.redhat.io/rhel10/rhel-bootc@sha256:e983235c2f531901c990c81b9d121663fa3b6db156e7b074c11eb812edba8fce
@@ -21,8 +21,8 @@ RUN --mount=type=secret,id=activation_key \
     bash /tmp/build.d/build.sh && \
     rm -rf /tmp/build.d
 
-# Copy GNOME 50 extensions from Bluefin LTS (pre-built for GNOME 50, no source compilation needed)
-RUN --mount=type=bind,from=bluefin-gnome50,source=/usr/share/gnome-shell/extensions,target=/tmp/bluefin-extensions \
+# Copy GNOME 49 extensions from Bluefin LTS (pre-built, no source compilation needed)
+RUN --mount=type=bind,from=bluefin-gnome49,source=/usr/share/gnome-shell/extensions,target=/tmp/bluefin-extensions \
     cp -av /tmp/bluefin-extensions/appindicatorsupport@rgcjonas.gmail.com /usr/share/gnome-shell/extensions/ && \
     cp -av /tmp/bluefin-extensions/blur-my-shell@aunetx                   /usr/share/gnome-shell/extensions/ && \
     cp -av /tmp/bluefin-extensions/caffeine@patapon.info                  /usr/share/gnome-shell/extensions/ && \

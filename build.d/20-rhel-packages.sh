@@ -16,7 +16,7 @@ dnf group install -y --nobest \
     "Standard" \
     "Workstation product core"
 
-# GNOME 50 packages — DNF pulls these from the COPR enabled in 10-gnome-copr.sh
+# GNOME 49 packages — DNF pulls these from the COPR enabled in 10-gnome-copr.sh
 dnf -y install \
     gdm \
     gnome-bluetooth \
@@ -74,22 +74,20 @@ dnf -y install \
     zsh \
     zstd
 
-# SELinux policy, PAM, and userdb socket fixes required for GNOME 50 on EL10
-dnf -y install gnome50-el10-compat
+# SELinux policy, PAM, and userdb socket fixes required for GNOME 49 on EL10
+dnf -y install gnome49-el10-compat
 
-# Lock remaining GNOME 50 packages against downgrade to RHEL 10 base versions.
-# glib2 and fontconfig are already locked in 10-gnome-copr.sh (must happen
-# before the group install to prevent gnome-shell startup crashes).
+# Lock remaining GNOME 49 packages. glib2 and fontconfig are already locked in
+# 10-gnome-copr.sh. gobject-introspection and gjs are locked here because glib2
+# 2.84+ ships two libgirepository versions — skew between these causes double-
+# registration crashes at gnome-shell startup.
 dnf versionlock add \
     gnome-shell \
     gdm \
-    mutter \
     gnome-session-wayland-session \
-    gnome-settings-daemon \
-    gnome-control-center \
-    gsettings-desktop-schemas \
-    gtk4 \
-    libadwaita \
+    gobject-introspection \
+    gjs \
     pango \
-    xdg-desktop-portal \
-    xdg-desktop-portal-gnome
+    selinux-policy \
+    selinux-policy-targeted \
+    gnutls
