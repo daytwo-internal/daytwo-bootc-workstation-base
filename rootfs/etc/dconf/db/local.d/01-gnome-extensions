@@ -1,5 +1,5 @@
 # System-wide GNOME defaults — users can override everything unless locked.
-# Extensions are copied from ghcr.io/ublue-os/bluefin:lts-50 during image build.
+# Extensions are copied from ghcr.io/ublue-os/bluefin:lts-testing during image build.
 
 [org/gnome/shell]
 enabled-extensions=['appindicatorsupport@rgcjonas.gmail.com', 'blur-my-shell@aunetx', 'caffeine@patapon.info', 'dash-to-dock@micxgx.gmail.com']
