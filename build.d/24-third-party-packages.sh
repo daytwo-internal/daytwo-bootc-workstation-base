@@ -15,16 +15,14 @@ dnf -y \
         terraform \
         zerotier-one
 
-# COPR packages
+# COPR packages (ghostty removed — no EPEL/RHEL build, installed via Flatpak instead)
 dnf -y \
     --enablerepo="copr:copr.fedorainfracloud.org:jchisholm204:Alacritty" \
     --enablerepo="copr:copr.fedorainfracloud.org:atim:starship" \
     --enablerepo="copr:copr.fedorainfracloud.org:che:nerd-fonts" \
     --enablerepo="copr:copr.fedorainfracloud.org:jdxcode:mise" \
-    --enablerepo="copr:copr.fedorainfracloud.org:scottames:ghostty" \
     install \
         alacritty \
-        ghostty \
         mise \
         nerd-fonts \
         starship
