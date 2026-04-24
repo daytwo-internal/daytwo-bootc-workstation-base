@@ -8,10 +8,12 @@ dnf -y install 'dnf-command(versionlock)' dnf-plugins-core
 # See: https://copr.fedorainfracloud.org/coprs/jreilly1821/c10s-gnome-50/
 dnf copr enable -y "jreilly1821/c10s-gnome-50"
 
-# libjxl 0.11 in this COPR has a different ABI than EPEL's 0.10, which breaks
-# epel-multimedia's libavcodec (needs libjxl.so.0.10). Exclude it so EPEL wins.
+# Exclude packages from this COPR that conflict with RHEL 10 base packages:
+# - libjxl*: COPR 0.11 has different ABI than EPEL's 0.10 (breaks libavcodec)
+# - pipewire*: COPR pipewire-alsa requires libasound.so.2(ALSA_1.2.15) which
+#   is not in RHEL 10's alsa-lib — use RHEL's pipewire instead
 GNOME50_REPO=$(find /etc/yum.repos.d/ -name "*jreilly1821*gnome-50*" | head -1)
-echo "exclude=libjxl*" >> "${GNOME50_REPO}"
+echo "exclude=libjxl* pipewire*" >> "${GNOME50_REPO}"
 
 # These upgrades MUST happen before the GNOME group install:
 # - selinux-policy: COPR 43.x required for GDM 50 userdb varlink socket;
