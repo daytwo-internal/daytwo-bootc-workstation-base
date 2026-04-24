@@ -45,8 +45,9 @@ dnf -y install \
 # SELinux policy, PAM, and userdb socket fixes required for GNOME 50 on EL10
 dnf -y install gnome50-el10-compat
 
-# Lock GNOME 50 packages to prevent dnf upgrade from downgrading back to
-# the RHEL 10 base GNOME version if RHEL repos later ship matching version numbers.
+# Lock remaining GNOME 50 packages against downgrade to RHEL 10 base versions.
+# glib2 and fontconfig are already locked in 10-gnome-copr.sh (must be done
+# before the group install to prevent crashes at gnome-shell startup).
 dnf versionlock add \
     gnome-shell \
     gdm \
@@ -58,7 +59,5 @@ dnf versionlock add \
     gtk4 \
     libadwaita \
     pango \
-    fontconfig \
-    glib2 \
     xdg-desktop-portal \
     xdg-desktop-portal-gnome
