@@ -3,10 +3,42 @@ set -euxo pipefail
 
 dnf -y update
 
-# Install Workstation group. GNOME 50 COPR repos (enabled in 10-gnome-copr.sh) take priority
-# so DNF resolves GNOME 50 packages instead of the base GNOME version from RHEL 10 repos.
-dnf -y groupinstall Workstation
+# The 'Workstation' environment group references 'base-graphical' which does not
+# exist in RHEL 10 when GNOME COPR repos are enabled, and the selinux-policy-targeted
+# from the COPR (43.x) conflicts with what the environment resolver tries to pin.
+# Bluefin LTS solves this identically: install specific component groups, then
+# GNOME packages individually so DNF pulls the COPR versions.
+dnf group install -y --nobest \
+    "Common NetworkManager submodules" \
+    "Core" \
+    "Fonts" \
+    "Hardware Support" \
+    "Standard" \
+    "Workstation product core"
 
+# GNOME 50 packages — DNF pulls these from the COPR enabled in 10-gnome-copr.sh
+dnf -y install \
+    gdm \
+    gnome-bluetooth \
+    gnome-color-manager \
+    gnome-control-center \
+    gnome-initial-setup \
+    gnome-remote-desktop \
+    gnome-session-wayland-session \
+    gnome-settings-daemon \
+    gnome-shell \
+    gnome-user-docs \
+    gvfs-fuse \
+    gvfs-goa \
+    gvfs-gphoto2 \
+    gvfs-mtp \
+    gvfs-smb \
+    nautilus \
+    orca \
+    xdg-desktop-portal-gnome \
+    xdg-user-dirs-gtk
+
+# DevOps and system packages
 dnf -y install \
     ansible-core \
     bootc \
@@ -46,8 +78,8 @@ dnf -y install \
 dnf -y install gnome50-el10-compat
 
 # Lock remaining GNOME 50 packages against downgrade to RHEL 10 base versions.
-# glib2 and fontconfig are already locked in 10-gnome-copr.sh (must be done
-# before the group install to prevent crashes at gnome-shell startup).
+# glib2 and fontconfig are already locked in 10-gnome-copr.sh (must happen
+# before the group install to prevent gnome-shell startup crashes).
 dnf versionlock add \
     gnome-shell \
     gdm \
