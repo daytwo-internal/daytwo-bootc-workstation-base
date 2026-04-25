@@ -75,7 +75,7 @@ dnf -y install \
     zstd
 
 # SELinux policy, PAM, and userdb socket fixes required for GNOME 49 on EL10
-dnf -y install gnome49-el10-compat
+dnf -y install gnome49-el10-compat libgda
 
 # Lock remaining GNOME 49 packages. glib2 and fontconfig are already locked in
 # 10-gnome-copr.sh. gobject-introspection and gjs are locked here because glib2
