@@ -3,7 +3,7 @@
 FROM ghcr.io/ublue-os/bluefin:lts AS bluefin-gnome49
 
 # RHEL 10 bootc Workstation Base Image
-FROM registry.redhat.io/rhel10/rhel-bootc@sha256:3fb542abf4c8a65f4388cbd52db67497a4e6a87cb8060f9cc79c193457d1b1e4
+FROM registry.redhat.io/rhel10/rhel-bootc@sha256:0fb293aed343272827f63cf9b4614c80d71a607f02fcb82319c235b8d0878996
 
 LABEL org.opencontainers.image.title="DayTwo RHEL 10 Bootc Workstation Base" \
       org.opencontainers.image.description="Shared base image for DayTwo DevOps team workstations" \
