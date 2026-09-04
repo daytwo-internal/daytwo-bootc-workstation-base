@@ -1,4 +1,4 @@
-name: Build and Push rhel10-bootc-workstation (base)
+name: Build and Push (base image)
 
 on:
   push:
@@ -12,18 +12,24 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_REGISTRY: quay.io
-  IMAGE_NAMESPACE: daytwo
-  IMAGE_NAME: rhel10-bootc-workstation
+  IMAGE_REGISTRY: ghcr.io
+  IMAGE_NAMESPACE: daytwo-internal
+  IMAGE_NAME: daytwo-bootc-workstation-base
+
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+      packages: write
+      id-token: write
+      attestations: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       # GitHub-hosted runners only have ~14GB free. A RHEL Workstation image
       # with all our DevOps tooling needs more than that to commit the layer.
@@ -42,43 +48,59 @@ jobs:
           podman --version
 
       - name: Log in to registry.redhat.io (pull base image)
+        env:
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_REDHAT_IO_PASSWORD }}
         run: |
-          podman login registry.redhat.io \
+          echo "${REGISTRY_PASSWORD}" | podman login registry.redhat.io \
             -u '${{ secrets.REGISTRY_REDHAT_IO_USER }}' \
-            -p '${{ secrets.REGISTRY_REDHAT_IO_PASSWORD }}'
+            --password-stdin
 
-      - name: Log in to quay.io (push built image)
-        run: |
-          podman login ${{ env.IMAGE_REGISTRY }} \
-            -u '${{ secrets.QUAY_USER }}' \
-            -p '${{ secrets.QUAY_PASSWORD }}'
+      - name: Log in to ghcr.io (push built image)
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: ${{ env.IMAGE_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Compute image tags
         id: tags
         run: |
-          SHORT_SHA="${GITHUB_SHA::7}"
+          IMAGE_FQN="${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}/${IMAGE_NAME}"
+          SHORT_SHA="${GITHUB_SHA:0:7}"
           DATE_TAG="$(date -u +%Y%m%d)"
-          echo "short_sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
-          echo "date_tag=${DATE_TAG}" >> "$GITHUB_OUTPUT"
+          # Date + short SHA so two builds on the same day never overwrite each other.
+          DATED_TAG="${DATE_TAG}-${SHORT_SHA}"
+
+          {
+            echo "image_fqn=${IMAGE_FQN}"
+            echo "short_sha=${SHORT_SHA}"
+            echo "dated_tag=${DATED_TAG}"
+          } >> "$GITHUB_OUTPUT"
+
+          if [ "${GITHUB_REF}" = "refs/heads/main" ]; then
+            echo "push_testing=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "push_testing=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Build image
         env:
           RHSM_ACTIVATION_KEY: ${{ secrets.RHSM_ACTIVATION_KEY }}
           RHSM_ORG_ID: ${{ secrets.RHSM_ORG_ID }}
+          IMAGE_FQN: ${{ steps.tags.outputs.image_fqn }}
+          SHORT_SHA: ${{ steps.tags.outputs.short_sha }}
+          DATED_TAG: ${{ steps.tags.outputs.dated_tag }}
         run: |
           # Write secrets to disk so podman build --secret can mount them.
           # We delete them in the always() step regardless of build outcome.
           printf '%s' "$RHSM_ACTIVATION_KEY" > activation_key.txt
           printf '%s' "$RHSM_ORG_ID" > org_id.txt
 
-          IMAGE_FQN="${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}/${IMAGE_NAME}"
-
           podman build \
             --secret id=activation_key,src=activation_key.txt \
             --secret id=org_id,src=org_id.txt \
-            --tag "${IMAGE_FQN}:latest" \
-            --tag "${IMAGE_FQN}:${{ steps.tags.outputs.date_tag }}" \
-            --tag "${IMAGE_FQN}:${{ steps.tags.outputs.short_sha }}" \
+            --tag "${IMAGE_FQN}:${SHORT_SHA}" \
+            --tag "${IMAGE_FQN}:${DATED_TAG}" \
             .
 
       - name: Wipe secret files
@@ -88,18 +110,65 @@ jobs:
             rm -f activation_key.txt org_id.txt
 
       - name: Inspect image
+        env:
+          IMAGE_FQN: ${{ steps.tags.outputs.image_fqn }}
+          SHORT_SHA: ${{ steps.tags.outputs.short_sha }}
         run: |
-          IMAGE_FQN="${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}/${IMAGE_NAME}"
-          podman image inspect "${IMAGE_FQN}:latest" \
+          podman image inspect "${IMAGE_FQN}:${SHORT_SHA}" \
             --format '{{ .Size }} bytes — {{ .Created }}'
-          podman image tree "${IMAGE_FQN}:latest" || true
+          podman image tree "${IMAGE_FQN}:${SHORT_SHA}" || true
 
-      - name: Push all tags
+      - name: Push tags
+        id: push
+        env:
+          IMAGE_FQN: ${{ steps.tags.outputs.image_fqn }}
+          SHORT_SHA: ${{ steps.tags.outputs.short_sha }}
+          DATED_TAG: ${{ steps.tags.outputs.dated_tag }}
+          PUSH_TESTING: ${{ steps.tags.outputs.push_testing }}
         run: |
-          IMAGE_FQN="${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}/${IMAGE_NAME}"
-          podman push "${IMAGE_FQN}:latest"
-          podman push "${IMAGE_FQN}:${{ steps.tags.outputs.date_tag }}"
-          podman push "${IMAGE_FQN}:${{ steps.tags.outputs.short_sha }}"
+          podman push --digestfile digest.txt "${IMAGE_FQN}:${SHORT_SHA}"
+          podman push "${IMAGE_FQN}:${DATED_TAG}"
+
+          if [ "${PUSH_TESTING}" = "true" ]; then
+            podman tag "${IMAGE_FQN}:${SHORT_SHA}" "${IMAGE_FQN}:testing"
+            podman push "${IMAGE_FQN}:testing"
+          fi
+
+          echo "digest=$(cat digest.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@7e8b541eb2e61bf99390e1afd4be13a184e9ebc5 # v3.10.1
+
+      - name: Sign image (keyless, by digest)
+        env:
+          IMAGE_FQN: ${{ steps.tags.outputs.image_fqn }}
+          DIGEST: ${{ steps.push.outputs.digest }}
+        run: |
+          cosign sign --yes "${IMAGE_FQN}@${DIGEST}"
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
+        with:
+          image: ${{ steps.tags.outputs.image_fqn }}@${{ steps.push.outputs.digest }}
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Attest SBOM (associated with the published digest)
+        uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34 # v3.0.0
+        with:
+          subject-name: ${{ steps.tags.outputs.image_fqn }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          sbom-path: sbom.spdx.json
+          push-to-registry: true
+
+      - name: Attest build provenance (associated with the published digest)
+        uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f # v3.2.0
+        with:
+          subject-name: ${{ steps.tags.outputs.image_fqn }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
 
       - name: Trigger derivative rebuilds
         if: github.ref == 'refs/heads/main'
