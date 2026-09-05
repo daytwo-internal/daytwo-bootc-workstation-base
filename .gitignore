@@ -17,6 +17,7 @@ etc/rclone/
 .env
 .env.*
 !.env.example
+secrets.txt
 
 # Editor / OS junk
 *~

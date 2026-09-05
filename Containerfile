@@ -8,7 +8,7 @@ FROM registry.redhat.io/rhel10/rhel-bootc@sha256:5063e0f77bbe437e0bc89f8f37703cd
 LABEL org.opencontainers.image.title="DayTwo RHEL 10 Bootc Workstation Base" \
       org.opencontainers.image.description="Shared base image for DayTwo DevOps team workstations" \
       org.opencontainers.image.vendor="DayTwo" \
-      org.opencontainers.image.source="https://github.com/daytwo-internal/rhel10-bootc-workstation-base"
+      org.opencontainers.image.source="https://github.com/daytwo-internal/daytwo-bootc-workstation-base"
 
 ARG OC_VERSION=4.20
 ARG NEOVIM_VERSION=0.11.2

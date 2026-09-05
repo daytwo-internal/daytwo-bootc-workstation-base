@@ -1,0 +1,72 @@
+name: Promote to stable
+
+# Explicit, manual-only promotion. Nothing else in this repo's workflows is
+# allowed to move the `stable` tag — see README.md for the promotion policy.
+
+on:
+  workflow_dispatch:
+    inputs:
+      digest:
+        description: 'Full digest to promote, e.g. sha256:abcdef... (from a testing/dated tag build that already passed review)'
+        required: true
+        type: string
+
+env:
+  IMAGE_REGISTRY: ghcr.io
+  IMAGE_NAMESPACE: daytwo-internal
+  IMAGE_NAME: daytwo-bootc-workstation-base
+
+permissions:
+  contents: read
+
+jobs:
+  promote:
+    runs-on: ubuntu-24.04
+    # Create this environment in repo settings with required reviewers to
+    # turn this into a gated, approval-based promotion.
+    environment: stable-promotion
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Validate digest input
+        run: |
+          if ! [[ "${{ inputs.digest }}" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "::error::digest input must look like sha256:<64 hex chars>"
+            exit 1
+          fi
+
+      - name: Install podman 5.x
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+          podman --version
+
+      - name: Log in to ghcr.io
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: ${{ env.IMAGE_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@7e8b541eb2e61bf99390e1afd4be13a184e9ebc5 # v3.10.1
+
+      - name: Verify the digest is signed before promoting
+        env:
+          IMAGE_FQN: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}
+          DIGEST: ${{ inputs.digest }}
+        run: |
+          cosign verify \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            --certificate-identity-regexp "^https://github.com/${GITHUB_REPOSITORY}/" \
+            "${IMAGE_FQN}@${DIGEST}"
+
+      - name: Promote digest to :stable
+        env:
+          IMAGE_FQN: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}
+          DIGEST: ${{ inputs.digest }}
+        run: |
+          podman pull "${IMAGE_FQN}@${DIGEST}"
+          podman tag "${IMAGE_FQN}@${DIGEST}" "${IMAGE_FQN}:stable"
+          podman push "${IMAGE_FQN}:stable"
