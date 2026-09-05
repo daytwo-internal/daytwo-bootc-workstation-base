@@ -126,27 +126,27 @@ gh attestation verify \
   --owner daytwo-internal
 ```
 
-The SBOM is pushed straight to the registry via `cosign attest` instead —
-this image's SBOM regularly exceeds the 16MB size cap on GitHub's own
-attestation API, so it isn't in the `gh attestation` list. Verify it with
-Cosign, same identity as the signature:
-
-```bash
-cosign verify-attestation \
-  --type spdxjson \
-  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  --certificate-identity-regexp '^https://github.com/daytwo-internal/daytwo-bootc-workstation-base/' \
-  ghcr.io/daytwo-internal/daytwo-bootc-workstation-base@sha256:<digest>
-```
+**There is no cryptographically attested SBOM for this image.** An SBOM is
+generated for every build (Syft, SPDX JSON) but only kept as that
+`build.yml` run's plain workflow artifact, not attested to the digest.
+Both official routes for that were tried and both reject this image's SBOM
+on size: GitHub's `attest-sbom` action caps predicates at 16MB, and routing
+through `cosign attest` instead still hits the public Rekor instance's own
+undocumented request-body size limit ([sigstore/rekor#2808](https://github.com/sigstore/rekor/issues/2808)) —
+confirmed by reproducing the identical failure twice, not a transient
+network issue. Download the SBOM from the relevant `build.yml` run's
+artifacts if you need it; it just isn't bound to the digest by a signature.
 
 ## CI
 
 - **build.yml** — builds on push to `main` when `Containerfile`, `rootfs/**`,
   or `build.d/**` change. Pushes `<short-sha>` and dated tags, moves
-  `testing`, signs the resulting digest with Cosign, pushes the SBOM as a
-  Cosign attestation, and attaches a build-provenance attestation via
-  GitHub's native attestations. Authenticates to GHCR with the ephemeral,
-  per-run `GITHUB_TOKEN` only.
+  `testing`, signs the resulting digest with Cosign, attaches a
+  build-provenance attestation via GitHub's native attestations, and
+  generates an SBOM (kept as a plain workflow artifact — see
+  [Verifying the Cosign signature](#verifying-the-cosign-signature) for why
+  it isn't attested to the digest). Authenticates to GHCR with the
+  ephemeral, per-run `GITHUB_TOKEN` only.
 - **weekly-rebuild.yml** — runs `build.yml` every Monday at 06:00 UTC to pick
   up upstream package updates.
 - **pr-validate.yml** — on every pull request: ShellCheck on `build.d/*.sh`,

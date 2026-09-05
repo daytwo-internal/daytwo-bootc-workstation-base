@@ -147,6 +147,11 @@ jobs:
           cosign sign --yes "${IMAGE_FQN}@${DIGEST}"
 
       - name: Generate SBOM
+        # Not cryptographically attested to the digest: both GitHub's
+        # attest-sbom action (16MB predicate cap) and cosign attest against
+        # the public Rekor instance (its own undocumented request-body-size
+        # limit, see https://github.com/sigstore/rekor/issues/2808) reject
+        # this image's SBOM. Kept as a plain workflow artifact for auditing.
         uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
         with:
           image: ${{ steps.tags.outputs.image_fqn }}@${{ steps.push.outputs.digest }}
@@ -154,19 +159,6 @@ jobs:
           registry-password: ${{ secrets.GITHUB_TOKEN }}
           format: spdx-json
           output-file: sbom.spdx.json
-
-      - name: Attest SBOM (associated with the published digest)
-        env:
-          IMAGE_FQN: ${{ steps.tags.outputs.image_fqn }}
-          DIGEST: ${{ steps.push.outputs.digest }}
-        run: |
-          # This Workstation image's SBOM regularly exceeds the 16MB predicate
-          # size limit of GitHub's native attest-sbom action (which stores
-          # attestations via the GitHub API). cosign attest instead pushes the
-          # attestation straight to the registry as an OCI artifact, which
-          # has no such cap.
-          cosign attest --yes --type spdxjson --predicate sbom.spdx.json \
-            "${IMAGE_FQN}@${DIGEST}"
 
       - name: Attest build provenance (associated with the published digest)
         uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f # v3.2.0
