@@ -113,31 +113,40 @@ cosign verify \
 ```
 
 A signature that fails to verify, or an image with no signature, must not be
-deployed. Build provenance and SBOM are published as separate GitHub
-[artifact attestations](https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds)
-for the same digest; verify them with `gh` (requires `gh auth login` and, for
+deployed.
+
+Build provenance is a GitHub
+[artifact attestation](https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds)
+for the same digest; verify it with `gh` (requires `gh auth login` and, for
 `oci://`, being logged in to the registry the artifact came from):
 
 ```bash
-# Build provenance (SLSA v1 — the default predicate type)
 gh attestation verify \
   oci://ghcr.io/daytwo-internal/daytwo-bootc-workstation-base@sha256:<digest> \
   --owner daytwo-internal
+```
 
-# SBOM (SPDX predicate)
-gh attestation verify \
-  oci://ghcr.io/daytwo-internal/daytwo-bootc-workstation-base@sha256:<digest> \
-  --owner daytwo-internal \
-  --predicate-type https://spdx.dev/Document/v2.3
+The SBOM is pushed straight to the registry via `cosign attest` instead —
+this image's SBOM regularly exceeds the 16MB size cap on GitHub's own
+attestation API, so it isn't in the `gh attestation` list. Verify it with
+Cosign, same identity as the signature:
+
+```bash
+cosign verify-attestation \
+  --type spdxjson \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate-identity-regexp '^https://github.com/daytwo-internal/daytwo-bootc-workstation-base/' \
+  ghcr.io/daytwo-internal/daytwo-bootc-workstation-base@sha256:<digest>
 ```
 
 ## CI
 
 - **build.yml** — builds on push to `main` when `Containerfile`, `rootfs/**`,
   or `build.d/**` change. Pushes `<short-sha>` and dated tags, moves
-  `testing`, signs the resulting digest with Cosign, and attaches an SBOM and
-  build-provenance attestation to that digest. Authenticates to GHCR with the
-  ephemeral, per-run `GITHUB_TOKEN` only.
+  `testing`, signs the resulting digest with Cosign, pushes the SBOM as a
+  Cosign attestation, and attaches a build-provenance attestation via
+  GitHub's native attestations. Authenticates to GHCR with the ephemeral,
+  per-run `GITHUB_TOKEN` only.
 - **weekly-rebuild.yml** — runs `build.yml` every Monday at 06:00 UTC to pick
   up upstream package updates.
 - **pr-validate.yml** — on every pull request: ShellCheck on `build.d/*.sh`,
