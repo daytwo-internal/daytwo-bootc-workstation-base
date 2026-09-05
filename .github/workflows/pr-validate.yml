@@ -95,8 +95,13 @@ jobs:
 
       - name: bootc container lint
         run: |
+          # sysusers/var-tmpfiles are upstream RPM packaging gaps (users and
+          # /var content created without systemd sysusers.d/tmpfiles.d
+          # entries) that can't be fixed from this repo. Everything else is
+          # fatal.
           podman run --rm "pr-validate:${{ github.sha }}" \
-            bootc container lint --fatal-warnings
+            bootc container lint --fatal-warnings \
+              --skip sysusers --skip var-tmpfiles
 
   summary:
     needs: [shellcheck, hadolint, build-and-lint]

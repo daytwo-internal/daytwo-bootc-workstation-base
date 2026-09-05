@@ -15,7 +15,10 @@ rm -rf \
     /var/log/dnf* \
     /var/log/hawkey.log \
     /var/log/yum* \
+    /var/log/rhsm \
     /tmp/* \
-    /var/tmp/*
+    /var/tmp/* \
+    /run/* \
+    /boot/symvers-*.xz
 
-bootc container lint
+bootc container lint --skip sysusers --skip var-tmpfiles
