@@ -18,7 +18,10 @@ rm -rf \
     /var/log/rhsm \
     /tmp/* \
     /var/tmp/* \
-    /run/* \
     /boot/symvers-*.xz
+
+# /run/secrets is the active podman --secret mount point for this RUN step;
+# removing it fails with "Device or resource busy", so clear everything else.
+find /run -mindepth 1 -maxdepth 1 ! -name secrets -exec rm -rf {} +
 
 bootc container lint --skip sysusers --skip var-tmpfiles
