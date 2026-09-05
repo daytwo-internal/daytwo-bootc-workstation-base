@@ -97,11 +97,13 @@ jobs:
         run: |
           # sysusers/var-tmpfiles are upstream RPM packaging gaps (users and
           # /var content created without systemd sysusers.d/tmpfiles.d
-          # entries) that can't be fixed from this repo. Everything else is
-          # fatal.
+          # entries) that can't be fixed from this repo. nonempty-run-tmp
+          # fires on the empty /run/secrets directory left by podman build
+          # --secret, which can only be removed after its RUN step ends (see
+          # build.d/cleanup.sh). Everything else is fatal.
           podman run --rm "pr-validate:${{ github.sha }}" \
             bootc container lint --fatal-warnings \
-              --skip sysusers --skip var-tmpfiles
+              --skip sysusers --skip var-tmpfiles --skip nonempty-run-tmp
 
   summary:
     needs: [shellcheck, hadolint, build-and-lint]
