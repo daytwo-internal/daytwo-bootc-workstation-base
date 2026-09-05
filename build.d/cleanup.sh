@@ -20,8 +20,13 @@ rm -rf \
     /var/tmp/* \
     /boot/symvers-*.xz
 
-# /run/secrets is the active podman --secret mount point for this RUN step;
-# removing it fails with "Device or resource busy", so clear everything else.
-find /run -mindepth 1 -maxdepth 1 ! -name secrets -exec rm -rf {} +
+# Clear /run, but skip anything podman/buildah keeps actively bind-mounted
+# for this RUN step (/run/secrets, /run/.containerenv, ...) — removing those
+# fails with "Device or resource busy".
+find /run -mindepth 1 -maxdepth 1 -exec bash -c '
+    for entry; do
+        mountpoint -q "$entry" || rm -rf "$entry"
+    done
+' bash {} +
 
 bootc container lint --skip sysusers --skip var-tmpfiles
