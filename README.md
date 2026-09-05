@@ -139,6 +139,15 @@ cosign verify-attestation \
   ghcr.io/daytwo-internal/daytwo-bootc-workstation-base@sha256:<digest>
 ```
 
+**The SBOM attestation is best-effort, not guaranteed.** Even routed through
+Cosign, this image's SBOM can still exceed the public Rekor instance's own
+undocumented request-body size limit ([sigstore/rekor#2808](https://github.com/sigstore/rekor/issues/2808)),
+which fails the same way regardless of retries. When that happens the build
+still succeeds — the signature and build-provenance attestation are
+unaffected — but there's no attested SBOM for that digest. Check the
+`build.yml` run's job summary for a warning when this happens; the plain
+(unattested) SBOM is still available as that run's workflow artifact.
+
 ## CI
 
 - **build.yml** — builds on push to `main` when `Containerfile`, `rootfs/**`,
