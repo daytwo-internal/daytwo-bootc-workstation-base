@@ -65,11 +65,16 @@ shred -u activation_key.txt org_id.txt 2>/dev/null || rm -f activation_key.txt o
 Consuming this image (via `bootc switch`, `podman pull`, or as a derivative
 `FROM`) requires a **read-only** token, since the package is private.
 
-1. Ask a repo owner for a GitHub [fine-grained personal access
-   token](https://github.com/settings/tokens?type=beta) scoped to:
-   - Repository access: `daytwo-internal/daytwo-bootc-workstation-base` only
-   - Permissions: **Contents: Read-only** and **Packages: Read-only**
-   - No write scopes.
+1. Create a GitHub [personal access token (classic)](https://github.com/settings/tokens)
+   with **only** the `read:packages` scope checked — nothing else.
+   Fine-grained tokens don't support package/container registry access at
+   all yet (there is no "Packages" permission in that UI, only "Contents"
+   and "Metadata"), so a classic token is the only thing that currently
+   works. Unlike a fine-grained token this can't be scoped to a single
+   repository — `read:packages` grants read access to every package your
+   account can see — so treat it as more sensitive than that implies and
+   set an expiration (90 days is a reasonable default; put a reminder on
+   your calendar to rotate it).
 2. Log in with it:
 
    ```bash
